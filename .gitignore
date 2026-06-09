@@ -1,0 +1,18 @@
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
+
+# Vercel
+.vercel/
+
+# 输出/临时
+node_modules/
+*.log
+minimax-output/
+
+# 内部参考文档（非绘本内容）
+minimax-CLI.md

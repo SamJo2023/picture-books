@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>绘本图书馆 · 为女儿收藏的童话</title>
+  <style>
+    :root {
+      --bg-1: #fff5e6;
+      --bg-2: #ffe8c2;
+      --accent: #e8954a;
+      --text: #4a2c1a;
+      --soft: #8a5a3a;
+      --card: #fffdf7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "STHeiti", sans-serif;
+      background:
+        radial-gradient(ellipse at top, var(--bg-2) 0%, var(--bg-1) 60%, #f5d9a8 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 60px 20px 100px;
+    }
+
+    header {
+      max-width: 960px;
+      margin: 0 auto 50px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 18px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      margin-bottom: 12px;
+      text-shadow: 2px 2px 0 rgba(232, 149, 74, 0.2);
+    }
+
+    .subtitle {
+      font-size: 17px;
+      color: var(--soft);
+    }
+
+    .grid {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+    }
+
+    .book-card {
+      background: var(--card);
+      border-radius: 22px;
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--text);
+      box-shadow:
+        0 16px 40px rgba(232, 149, 74, 0.15),
+        0 4px 10px rgba(74, 44, 26, 0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book-card:hover {
+      transform: translateY(-6px);
+      box-shadow:
+        0 24px 56px rgba(232, 149, 74, 0.25),
+        0 6px 14px rgba(74, 44, 26, 0.1);
+    }
+
+    .book-card .cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background: linear-gradient(135deg, #fff8e8, #ffe9c4);
+    }
+
+    .book-card .info {
+      padding: 20px 22px 24px;
+    }
+
+    .book-card h2 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .book-card .meta {
+      font-size: 14px;
+      color: var(--soft);
+      margin-bottom: 10px;
+    }
+
+    .book-card .desc {
+      font-size: 14px;
+      color: var(--text);
+      opacity: 0.8;
+      line-height: 1.6;
+    }
+
+    .book-card .arrow {
+      margin-top: 14px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    footer {
+      max-width: 960px;
+      margin: 70px auto 0;
+      text-align: center;
+      color: var(--soft);
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 36px; letter-spacing: 4px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="badge">3D 卡通绘本</span>
+    <h1>绘本图书馆</h1>
+    <p class="subtitle">为女儿收藏的童话故事 · 翻页 + 童声朗读</p>
+  </header>
+
+  <main class="grid">
+    <a class="book-card" href="xiaoma/">
+      <img class="cover" src="xiaoma/images/01-chufazhong.png" alt="小马过河封面">
+      <div class="info">
+        <h2>小马过河</h2>
+        <div class="meta">中国传统童话 · 8 页 · 童声朗读</div>
+        <p class="desc">小马要帮妈妈把麦子驮到磨坊去，路上遇到一条小河。牛伯伯说水很浅，小松鼠说水很深……小马最后会怎么做呢？</p>
+        <div class="arrow">翻开绘本 ›</div>
+      </div>
+    </a>
+
+    <!-- 以后新增的绘本卡片就加在这里 -->
+  </main>
+
+  <footer>
+    — 更多绘本，敬请期待 —
+  </footer>
+
+</body>
+</html>

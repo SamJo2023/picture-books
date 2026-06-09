@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小马过河 · 3D 卡通儿童绘本</title>
+
+  <!-- 预加载所有音频，首翻页即播 -->
+  <link rel="preload" href="audio/01.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/02.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/03.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/04.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/05.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/06.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/07.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/08.mp3" as="audio" type="audio/mpeg">
+  <style>
+    :root {
+      --bg-1: #fff5e6;
+      --bg-2: #ffe8c2;
+      --accent: #e8954a;
+      --text: #4a2c1a;
+      --soft: #8a5a3a;
+      --card: #fffdf7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "STHeiti", "Source Han Sans CN", sans-serif;
+      background:
+        radial-gradient(ellipse at top, var(--bg-2) 0%, var(--bg-1) 60%, #f5d9a8 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 100px;
+      overflow-x: hidden;
+    }
+
+    /* 3D book stage */
+    .book-stage {
+      perspective: 2400px;
+      perspective-origin: 50% 30%;
+      width: 100%;
+      max-width: 880px;
+      position: relative;
+    }
+
+    .book {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: 78vh;
+      transform-style: preserve-3d;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow:
+        0 20px 50px rgba(74, 44, 26, 0.18),
+        0 6px 16px rgba(74, 44, 26, 0.08),
+        inset 0 0 0 1px rgba(232, 149, 74, 0.1);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transition: transform 0.85s cubic-bezier(0.45, 0.05, 0.2, 1),
+                  opacity 0.6s ease;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Page states */
+    .page.active {
+      opacity: 1;
+      transform: rotateY(0deg) translateZ(0);
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    .page.prev {
+      opacity: 0;
+      transform: rotateY(-180deg) translateZ(0);
+      z-index: 2;
+    }
+
+    .page.next {
+      opacity: 0;
+      transform: rotateY(0deg) translateZ(-50px);
+      z-index: 1;
+    }
+
+    /* Cover page */
+    .cover-page {
+      background:
+        radial-gradient(ellipse at top, #fff8e8 0%, #ffe0b3 70%, #f5c98a 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .cover-content {
+      padding: 32px;
+    }
+
+    .cover-content .badge {
+      display: inline-block;
+      padding: 6px 18px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 14px;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .cover-content h1 {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: 10px;
+      color: var(--text);
+      margin-bottom: 16px;
+      text-shadow: 3px 3px 0 rgba(232, 149, 74, 0.25);
+    }
+
+    .cover-content .subtitle {
+      font-size: 18px;
+      color: var(--soft);
+      margin-bottom: 28px;
+    }
+
+    .cover-art {
+      font-size: 96px;
+      margin: 16px 0;
+      animation: bob 2.5s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .start-hint {
+      margin-top: 24px;
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 600;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Content page layout */
+    .content-page {
+      padding: 20px;
+    }
+
+    .page-image {
+      flex: 1;
+      min-height: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #fff8e8, #ffe9c4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .page-text {
+      flex-shrink: 0;
+      padding: 18px 8px 4px;
+      text-align: center;
+    }
+
+    .page-num {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 3px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .page-text p {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 12px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .page-text audio {
+      width: 100%;
+      max-width: 480px;
+      height: 38px;
+    }
+
+    /* End page */
+    .end-page {
+      background:
+        radial-gradient(ellipse at top, #fff8e8 0%, #ffe0b3 70%, #f5c98a 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .end-content { padding: 32px; }
+
+    .end-content h2 {
+      font-size: 36px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .end-content .lesson {
+      font-size: 20px;
+      color: var(--text);
+      margin: 8px 0 12px;
+    }
+
+    .end-content .lesson-text {
+      font-size: 17px;
+      color: var(--soft);
+      line-height: 1.9;
+      max-width: 560px;
+      margin: 0 auto 28px;
+    }
+
+    .restart-btn {
+      padding: 12px 32px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(232, 149, 74, 0.4);
+    }
+
+    /* Controls */
+    .controls {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .ctrl-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.2s, background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ctrl-btn:hover:not(:disabled) {
+      background: var(--accent);
+      color: white;
+      transform: scale(1.08);
+    }
+
+    .ctrl-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .indicator {
+      font-size: 16px;
+      color: var(--soft);
+      font-weight: 600;
+      min-width: 110px;
+      text-align: center;
+    }
+
+    .hint-text {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--soft);
+      opacity: 0.7;
+    }
+
+    /* Mobile */
+    @media (max-width: 720px) {
+      .cover-content h1 { font-size: 44px; letter-spacing: 6px; }
+      .cover-art { font-size: 72px; }
+      .end-content h2 { font-size: 26px; }
+      .page-text p { font-size: 15px; }
+      .ctrl-btn { width: 44px; height: 44px; font-size: 20px; }
+      .indicator { font-size: 14px; min-width: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="book-stage">
+    <div class="book" id="book">
+
+      <!-- Cover -->
+      <section class="page cover-page active" data-page="0" data-title="封面">
+        <div class="cover-content">
+          <span class="badge">中国传统童话</span>
+          <h1>小马过河</h1>
+          <p class="subtitle">3D 卡通绘本 · 童声朗读版</p>
+          <div class="cover-art">🐴</div>
+          <p class="start-hint">点击翻页 · 开始阅读</p>
+        </div>
+      </section>
+
+      <!-- Page 1 -->
+      <section class="page content-page" data-page="1" data-title="第 1 页">
+        <div class="page-image"><img src="images/01-chufazhong.png" alt="小马驮着麦子出发"></div>
+        <div class="page-text">
+          <span class="page-num">第 1 页</span>
+          <p>小马帮妈妈把麦子驮到磨坊去。它迈着轻快的步子，高高兴兴地出发了。</p>
+          <audio preload="auto" src="audio/01.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 2 -->
+      <section class="page content-page" data-page="2" data-title="第 2 页">
+        <div class="page-image"><img src="images/02-yuhe.png" alt="小河挡住了去路"></div>
+        <div class="page-text">
+          <span class="page-num">第 2 页</span>
+          <p>走到一条小河边，小马发现前面没有桥，哗哗的河水挡住了去路。</p>
+          <audio preload="auto" src="audio/02.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 3 -->
+      <section class="page content-page" data-page="3" data-title="第 3 页">
+        <div class="page-image"><img src="images/03-niubobo.png" alt="老牛伯伯说水浅"></div>
+        <div class="page-text">
+          <span class="page-num">第 3 页</span>
+          <p>一头老牛伯伯正好路过，说："孩子，水很浅，刚到我的小腿，你大胆地蹚过去吧。"</p>
+          <audio preload="auto" src="audio/03.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 4 -->
+      <section class="page content-page" data-page="4" data-title="第 4 页">
+        <div class="page-image"><img src="images/04-xiaosongshu.png" alt="小松鼠警告水深"></div>
+        <div class="page-text">
+          <span class="page-num">第 4 页</span>
+          <p>话音刚落，树上的小松鼠急忙喊："别下去！水可深啦，我的伙伴就是在这条河里淹死的！"</p>
+          <audio preload="auto" src="audio/04.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 5 -->
+      <section class="page content-page" data-page="5" data-title="第 5 页">
+        <div class="page-image"><img src="images/05-huijia.png" alt="小马回家问妈妈"></div>
+        <div class="page-text">
+          <span class="page-num">第 5 页</span>
+          <p>小马不知道该听谁的，只好低着头，驮着麦子回家问妈妈。</p>
+          <audio preload="auto" src="audio/05.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 6 -->
+      <section class="page content-page" data-page="6" data-title="第 6 页">
+        <div class="page-image"><img src="images/06-mama.png" alt="妈妈温柔安慰小马"></div>
+        <div class="page-text">
+          <span class="page-num">第 6 页</span>
+          <p>妈妈把小马搂在怀里，温柔地说："没关系，咱们一起去看看吧。"</p>
+          <audio preload="auto" src="audio/06.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 7 -->
+      <section class="page content-page" data-page="7" data-title="第 7 页">
+        <div class="page-image"><img src="images/07-shiguohe.png" alt="小马试探着过河"></div>
+        <div class="page-text">
+          <span class="page-num">第 7 页</span>
+          <p>妈妈这回让小马自己去试探。小马小心地伸出蹄子，一步、一步、一步，蹚过了河。</p>
+          <audio preload="auto" src="audio/07.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 8 -->
+      <section class="page content-page" data-page="8" data-title="第 8 页">
+        <div class="page-image"><img src="images/08-mingbai.png" alt="小马明白了道理"></div>
+        <div class="page-text">
+          <span class="page-num">第 8 页</span>
+          <p>小马回头望了望妈妈，心里说："谢谢您了，好妈妈。"然后转身向村子跑去。它明白了——河水既没有牛伯伯说的那么浅，也没有小松鼠说的那么深，只有自己亲自试过才知道。</p>
+          <audio preload="auto" src="audio/08.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- End page -->
+      <section class="page end-page" data-page="9" data-title="完">
+        <div class="end-content">
+          <h2>🐴 故事讲完啦 🐴</h2>
+          <p class="lesson">小道理，大智慧</p>
+          <p class="lesson-text">别人的经验可以参考，但只有自己勇敢尝试，才能知道真正的答案。</p>
+          <button class="restart-btn" id="restartBtn">↺ 再读一遍</button>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="prevBtn" aria-label="上一页">‹</button>
+      <span class="indicator" id="indicator">封面 / 10</span>
+      <button class="ctrl-btn" id="nextBtn" aria-label="下一页">›</button>
+    </div>
+    <p class="hint-text">点击书页 · 或按 ← → 方向键 · 翻到新页自动播放朗读</p>
+  </div>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const total = pages.length;
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const indicator = document.getElementById('indicator');
+    const restartBtn = document.getElementById('restartBtn');
+    const book = document.getElementById('book');
+
+    let current = 0;
+    let userInteracted = false;
+
+    function setStates() {
+      pages.forEach((p, i) => {
+        p.classList.remove('active', 'prev', 'next');
+        if (i === current) p.classList.add('active');
+        else if (i < current) p.classList.add('prev');
+        else p.classList.add('next');
+      });
+      indicator.textContent = `${pages[current].dataset.title} · ${current + 1}/${total}`;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+
+      // Pause all audios, then play the current page's audio
+      document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+      const curAudio = pages[current].querySelector('audio');
+      if (curAudio && userInteracted) {
+        curAudio.play().catch(() => { /* autoplay blocked, user can press play */ });
+      }
+    }
+
+    function go(dir) {
+      const target = current + dir;
+      if (target < 0 || target >= total) return;
+      current = target;
+      setStates();
+    }
+
+    function jumpTo(idx) {
+      if (idx < 0 || idx >= total) return;
+      current = idx;
+      setStates();
+    }
+
+    // Click on book area → next page (unless clicking on audio controls)
+    book.addEventListener('click', (e) => {
+      // Don't trigger page flip when interacting with audio controls
+      if (e.target.closest('audio') || e.target.closest('button')) return;
+      userInteracted = true;
+      if (current < total - 1) go(1);
+    });
+
+    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; go(-1); });
+    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; go(1); });
+    restartBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; jumpTo(0); });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); userInteracted = true; go(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); userInteracted = true; go(-1); }
+      else if (e.key === 'Home') { userInteracted = true; jumpTo(0); }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    book.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      userInteracted = true;
+    }, { passive: true });
+    book.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0) go(1);   // swipe left → next
+        else go(-1);          // swipe right → previous
+      }
+    }, { passive: true });
+
+    setStates();
+  </script>
+</body>
+</html>
