@@ -35,8 +35,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 24px 16px 100px;
+      justify-content: flex-start;
+      padding: 14px 16px 16px;
       overflow-x: hidden;
     }
 
@@ -53,7 +53,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 4 / 3;
-      max-height: 78vh;
+      max-height: 75vh;
       transform-style: preserve-3d;
     }
 
@@ -179,7 +179,7 @@
     .page-image img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
     }
 
@@ -265,56 +265,62 @@
       box-shadow: 0 8px 20px rgba(232, 149, 74, 0.4);
     }
 
-    /* Controls */
-    .controls {
-      margin-top: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
+    .hint-text {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--soft);
+      opacity: 0.7;
     }
 
-    .ctrl-btn {
-      width: 52px;
-      height: 52px;
+    /* Auto-flip floating action button (inside book, bottom-right) */
+    .autoplay-fab {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: var(--card);
       border: 2px solid var(--accent);
       color: var(--accent);
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
       cursor: pointer;
       font-family: inherit;
-      transition: transform 0.2s, background 0.2s, color 0.2s;
+      z-index: 1000;
+      /* translate3d + high z keeps the FAB in front during 3D page flips */
+      transform: translate3d(0, 0, 120px);
+      will-change: transform;
+      box-shadow: 0 3px 10px rgba(74, 44, 26, 0.22);
       display: flex;
       align-items: center;
       justify-content: center;
+      /* No transform transition — a hover-scale was the visible "flash" on page-flip */
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
     }
 
-    .ctrl-btn:hover:not(:disabled) {
+    .autoplay-fab:hover {
+      box-shadow: 0 4px 14px rgba(74, 44, 26, 0.35);
+    }
+
+    .autoplay-fab.active {
       background: var(--accent);
       color: white;
-      transform: scale(1.08);
+      box-shadow: 0 5px 16px rgba(232, 149, 74, 0.5);
+      animation: autoPulse 1.6s ease-in-out infinite;
     }
 
-    .ctrl-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
+    .autoplay-fab.paused {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 3px 10px rgba(232, 149, 74, 0.4);
+      animation: none;
     }
 
-    .indicator {
-      font-size: 16px;
-      color: var(--soft);
-      font-weight: 600;
-      min-width: 110px;
-      text-align: center;
-    }
-
-    .hint-text {
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--soft);
-      opacity: 0.7;
+    @keyframes autoPulse {
+      0%, 100% { box-shadow: 0 6px 18px rgba(232, 149, 74, 0.5); }
+      50% { box-shadow: 0 8px 26px rgba(232, 149, 74, 0.75); }
     }
 
     /* Mobile */
@@ -323,8 +329,8 @@
       .cover-art { font-size: 72px; }
       .end-content h2 { font-size: 26px; }
       .page-text p { font-size: 15px; }
-      .ctrl-btn { width: 44px; height: 44px; font-size: 20px; }
-      .indicator { font-size: 14px; min-width: 90px; }
+      .autoplay-fab { width: 36px; height: 36px; font-size: 14px; bottom: 14px; right: 14px; }
+      .hint-text { font-size: 11px; }
 
       /* 修复：手机端图片按原始 16:9 显示，不再被上下裁剪 */
       .book {
@@ -461,27 +467,36 @@
         </div>
       </section>
 
+      <button class="autoplay-fab" id="autoFlipBtn" aria-label="自动朗读" title="自动朗读">▶</button>
+
     </div>
 
-    <div class="controls">
-      <button class="ctrl-btn" id="prevBtn" aria-label="上一页">‹</button>
-      <span class="indicator" id="indicator">封面 / 10</span>
-      <button class="ctrl-btn" id="nextBtn" aria-label="下一页">›</button>
-    </div>
-    <p class="hint-text">点击书页 · 或按 ← → 方向键 · 翻到新页自动播放朗读</p>
+    <p class="hint-text">点击书页左/右半区翻页 · 或按 ← → 方向键</p>
   </div>
 
   <script>
     const pages = Array.from(document.querySelectorAll('.page'));
     const total = pages.length;
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const indicator = document.getElementById('indicator');
     const restartBtn = document.getElementById('restartBtn');
     const book = document.getElementById('book');
+    const autoFlipBtn = document.getElementById('autoFlipBtn');
+    const hintText = document.querySelector('.hint-text');
 
     let current = 0;
     let userInteracted = false;
+    let autoFlip = false;
+    let autoAudioPaused = false;  // only meaningful when autoFlip is true
+    let autoAdvanceTimer = null;
+    let trackedAudio = null;
+
+    const DEFAULT_HINT = '点击书页左/右半区翻页 · 或按 ← → 方向键';
+    const AUTOPLAY_HINT = '正在自动朗读';
+    const PAUSED_HINT = '朗读已暂停';
+    const FAB_PLAY = '▶';
+    const FAB_PAUSE = '⏸';
+    // Audio clips are short (~10-20s); 30s is a safe upper bound for the safety net
+    const AUDIO_TIMEOUT_MS = 30000;
+    const COVER_DELAY_MS = 1500;
 
     function setStates() {
       pages.forEach((p, i) => {
@@ -490,16 +505,16 @@
         else if (i < current) p.classList.add('prev');
         else p.classList.add('next');
       });
-      indicator.textContent = `${pages[current].dataset.title} · ${current + 1}/${total}`;
-      prevBtn.disabled = current === 0;
-      nextBtn.disabled = current === total - 1;
 
-      // Pause all audios, then play the current page's audio
+      // Pause all audios, then play the current page's audio (unless auto-flip is paused)
       document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
       const curAudio = pages[current].querySelector('audio');
-      if (curAudio && userInteracted) {
+      const autoPaused = autoFlip && autoAudioPaused;
+      if (curAudio && userInteracted && !autoPaused) {
         curAudio.play().catch(() => { /* autoplay blocked, user can press play */ });
       }
+
+      scheduleAutoAdvance();
     }
 
     function go(dir) {
@@ -515,16 +530,128 @@
       setStates();
     }
 
-    // Click on book area → next page (unless clicking on audio controls)
-    book.addEventListener('click', (e) => {
-      // Don't trigger page flip when interacting with audio controls
-      if (e.target.closest('audio') || e.target.closest('button')) return;
-      userInteracted = true;
-      if (current < total - 1) go(1);
+    // --- Auto-flip logic: advance to next page when current page's audio ends ---
+    function onAudioEnded() {
+      advanceOne();
+    }
+
+    function clearAutoAdvance() {
+      if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+      if (trackedAudio) {
+        trackedAudio.removeEventListener('ended', onAudioEnded);
+        trackedAudio = null;
+      }
+    }
+
+    function pauseCurrentAudio() {
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.pause();
+    }
+
+    function advanceOne() {
+      if (autoFlip && !autoAudioPaused && current < total - 1) {
+        current++;
+        setStates();
+      }
+    }
+
+    function scheduleAutoAdvance() {
+      clearAutoAdvance();
+      if (!autoFlip || autoAudioPaused || current >= total - 1) return;
+
+      const curAudio = pages[current].querySelector('audio');
+      if (curAudio) {
+        curAudio.addEventListener('ended', onAudioEnded);
+        trackedAudio = curAudio;
+        // Safety net in case `ended` never fires (autoplay blocked, network error, etc.)
+        autoAdvanceTimer = setTimeout(advanceOne, AUDIO_TIMEOUT_MS);
+      } else {
+        // Cover page has no audio — advance after a short delay
+        autoAdvanceTimer = setTimeout(advanceOne, COVER_DELAY_MS);
+      }
+    }
+
+    function updateAutoFlipButton() {
+      autoFlipBtn.classList.toggle('active', autoFlip && !autoAudioPaused);
+      autoFlipBtn.classList.toggle('paused', autoFlip && autoAudioPaused);
+      if (!autoFlip) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '自动朗读');
+        autoFlipBtn.setAttribute('title', '自动朗读');
+        hintText.textContent = DEFAULT_HINT;
+      } else if (autoAudioPaused) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '继续朗读');
+        autoFlipBtn.setAttribute('title', '继续朗读');
+        hintText.textContent = PAUSED_HINT;
+      } else {
+        autoFlipBtn.textContent = FAB_PAUSE;
+        autoFlipBtn.setAttribute('aria-label', '暂停朗读');
+        autoFlipBtn.setAttribute('title', '暂停朗读');
+        hintText.textContent = AUTOPLAY_HINT;
+      }
+    }
+
+    function setAutoFlip(on) {
+      autoFlip = on;
+      autoAudioPaused = false;
+      if (on) {
+        // userInteracted must be set before setStates() — setStates reads it to decide autoplay
+        userInteracted = true;
+        if (current >= total - 1) current = 0;  // restart from cover when toggling on from end page
+        setStates();
+      } else {
+        pauseCurrentAudio();
+        clearAutoAdvance();
+      }
+      updateAutoFlipButton();
+    }
+
+    function pauseAutoAudio() {
+      if (!autoFlip || autoAudioPaused) return;
+      autoAudioPaused = true;
+      pauseCurrentAudio();
+      clearAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    function resumeAutoAudio() {
+      if (!autoFlip || !autoAudioPaused) return;
+      autoAudioPaused = false;
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.play().catch(() => {});
+      scheduleAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    autoFlipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!autoFlip) setAutoFlip(true);
+      else if (autoAudioPaused) resumeAutoAudio();
+      else pauseAutoAudio();
     });
 
-    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; go(-1); });
-    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; go(1); });
+    // Click on book area: left half = prev, right half = next
+    book.addEventListener('click', (e) => {
+      if (e.target.closest('audio') || e.target.closest('button')) return;
+      userInteracted = true;
+      // Manual flip while paused → resume auto-flip on the new page
+      if (autoFlip && autoAudioPaused) {
+        autoAudioPaused = false;
+        updateAutoFlipButton();
+      }
+      const rect = book.getBoundingClientRect();
+      const isLeft = e.clientX - rect.left < rect.width / 2;
+      if (isLeft) {
+        if (current > 0) go(-1);
+      } else {
+        if (current < total - 1) go(1);
+      }
+    });
+
     restartBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; jumpTo(0); });
 
     document.addEventListener('keydown', (e) => {
