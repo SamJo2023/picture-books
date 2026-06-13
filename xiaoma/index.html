@@ -498,6 +498,27 @@
     const AUDIO_TIMEOUT_MS = 30000;
     const COVER_DELAY_MS = 1500;
 
+    // Robust audio play: handles the "autoplay blocked" case that happens during
+    // auto-advance (setTimeout / audio 'ended' event is NOT a user-gesture context,
+    // so browsers like Chrome/Safari may reject .play() in that path).
+    // If rejected, retry on the very next user gesture anywhere on the page.
+    function tryPlay(audio) {
+      if (!audio) return;
+      const p = audio.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch((err) => {
+          console.warn('[audio] play() rejected, waiting for user gesture:', err && err.name);
+          const retry = () => {
+            const cur = pages[current] && pages[current].querySelector('audio');
+            if (cur) cur.play().catch(() => {});
+          };
+          document.addEventListener('click', retry, { once: true });
+          document.addEventListener('keydown', retry, { once: true });
+          document.addEventListener('touchstart', retry, { once: true });
+        });
+      }
+    }
+
     function setStates() {
       pages.forEach((p, i) => {
         p.classList.remove('active', 'prev', 'next');
@@ -511,7 +532,7 @@
       const curAudio = pages[current].querySelector('audio');
       const autoPaused = autoFlip && autoAudioPaused;
       if (curAudio && userInteracted && !autoPaused) {
-        curAudio.play().catch(() => { /* autoplay blocked, user can press play */ });
+        tryPlay(curAudio);
       }
 
       scheduleAutoAdvance();
