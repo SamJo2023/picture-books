@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小刺猬圆圆的拥抱 · Soft 3D 黏土风绘本</title>
+
+  <!-- 预加载所有音频，首翻页即播 -->
+  <link rel="preload" href="audio/01.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/02.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/03.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/04.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/05.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/06.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/07.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/08.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/09.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/10.mp3" as="audio" type="audio/mpeg">
+  <style>
+    :root {
+      --bg-1: #fff5e6;
+      --bg-2: #ffe8c2;
+      --accent: #e8954a;
+      --text: #4a2c1a;
+      --soft: #8a5a3a;
+      --card: #fffdf7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "STHeiti", "Source Han Sans CN", sans-serif;
+      background:
+        radial-gradient(ellipse at top, var(--bg-2) 0%, var(--bg-1) 60%, #f5d9a8 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 14px 16px 16px;
+      overflow-x: hidden;
+    }
+
+    /* 3D book stage */
+    .book-stage {
+      perspective: 2400px;
+      perspective-origin: 50% 30%;
+      width: 100%;
+      max-width: 880px;
+      position: relative;
+    }
+
+    .book {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: 75vh;
+      transform-style: preserve-3d;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow:
+        0 20px 50px rgba(74, 44, 26, 0.18),
+        0 6px 16px rgba(74, 44, 26, 0.08),
+        inset 0 0 0 1px rgba(232, 149, 74, 0.1);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transition: transform 0.85s cubic-bezier(0.45, 0.05, 0.2, 1),
+                  opacity 0.6s ease;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Page states */
+    .page.active {
+      opacity: 1;
+      transform: rotateY(0deg) translateZ(0);
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    .page.prev {
+      opacity: 0;
+      transform: rotateY(-180deg) translateZ(0);
+      z-index: 2;
+    }
+
+    .page.next {
+      opacity: 0;
+      transform: rotateY(0deg) translateZ(-50px);
+      z-index: 1;
+    }
+
+    /* Cover page */
+    .cover-page {
+      background:
+        radial-gradient(ellipse at top, #fff8e8 0%, #ffe0b3 70%, #f5c98a 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .cover-content {
+      padding: 32px;
+    }
+
+    .cover-content .badge {
+      display: inline-block;
+      padding: 6px 18px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 14px;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .cover-content h1 {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: 10px;
+      color: var(--text);
+      margin-bottom: 16px;
+      text-shadow: 3px 3px 0 rgba(232, 149, 74, 0.25);
+    }
+
+    .cover-content .subtitle {
+      font-size: 18px;
+      color: var(--soft);
+      margin-bottom: 28px;
+    }
+
+    .cover-art {
+      font-size: 96px;
+      margin: 16px 0;
+      animation: bob 2.5s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .start-hint {
+      margin-top: 24px;
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 600;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Content page layout */
+    .content-page {
+      padding: 20px;
+    }
+
+    .page-image {
+      flex: 1;
+      min-height: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #fff8e8, #ffe9c4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .page-text {
+      flex-shrink: 0;
+      padding: 18px 8px 4px;
+      text-align: center;
+    }
+
+    .page-num {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 3px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .page-text p {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 12px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .page-text audio {
+      width: 100%;
+      max-width: 480px;
+      height: 38px;
+    }
+
+    /* End page */
+    .end-page {
+      background:
+        radial-gradient(ellipse at top, #fff8e8 0%, #ffe0b3 70%, #f5c98a 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .end-content { padding: 32px; }
+
+    .end-content h2 {
+      font-size: 36px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .end-content .lesson {
+      font-size: 20px;
+      color: var(--text);
+      margin: 8px 0 12px;
+    }
+
+    .end-content .lesson-text {
+      font-size: 17px;
+      color: var(--soft);
+      line-height: 1.9;
+      max-width: 560px;
+      margin: 0 auto 28px;
+    }
+
+    .restart-btn {
+      padding: 12px 32px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(232, 149, 74, 0.4);
+    }
+
+    .hint-text {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--soft);
+      opacity: 0.7;
+    }
+
+    /* Auto-flip floating action button (inside book, bottom-right) */
+    .autoplay-fab {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      z-index: 1000;
+      /* translate3d + high z keeps the FAB in front during 3D page flips */
+      transform: translate3d(0, 0, 120px);
+      will-change: transform;
+      box-shadow: 0 3px 10px rgba(74, 44, 26, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* No transform transition — a hover-scale was the visible "flash" on page-flip */
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .autoplay-fab:hover {
+      box-shadow: 0 4px 14px rgba(74, 44, 26, 0.35);
+    }
+
+    .autoplay-fab.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 5px 16px rgba(232, 149, 74, 0.5);
+      animation: autoPulse 1.6s ease-in-out infinite;
+    }
+
+    .autoplay-fab.paused {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 3px 10px rgba(232, 149, 74, 0.4);
+      animation: none;
+    }
+
+    @keyframes autoPulse {
+      0%, 100% { box-shadow: 0 6px 18px rgba(232, 149, 74, 0.5); }
+      50% { box-shadow: 0 8px 26px rgba(232, 149, 74, 0.75); }
+    }
+
+    /* Mobile */
+    @media (max-width: 720px) {
+      .cover-content h1 { font-size: 44px; letter-spacing: 6px; }
+      .cover-art { font-size: 72px; }
+      .end-content h2 { font-size: 26px; }
+      .page-text p { font-size: 15px; }
+      .autoplay-fab { width: 36px; height: 36px; font-size: 14px; bottom: 14px; right: 14px; }
+      .hint-text { font-size: 11px; }
+
+      /* 修复：手机端图片按原始 16:9 显示，不再被上下裁剪 */
+      .book {
+        aspect-ratio: auto;
+        max-height: none;
+      }
+      .page {
+        position: relative;
+        inset: auto;
+        transform: none !important;
+        opacity: 1 !important;
+        display: none;
+      }
+      .page.active {
+        display: flex;
+        animation: pageFadeIn 0.3s ease;
+      }
+      .page-image {
+        flex: none;
+        aspect-ratio: 16 / 9;
+        min-height: 0;
+      }
+
+      @keyframes pageFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="book-stage">
+    <div class="book" id="book">
+
+      <!-- Cover -->
+      <section class="page cover-page active" data-page="0" data-title="封面">
+        <div class="cover-content">
+          <span class="badge">Soft 3D 黏土风绘本</span>
+          <h1>小刺猬圆圆的拥抱</h1>
+          <p class="subtitle">森林睡前故事 · 童声朗读版</p>
+          <div class="cover-art">🦔</div>
+          <p class="start-hint">点击翻页 · 开始阅读</p>
+        </div>
+      </section>
+
+      <!-- Page 1 -->
+      <section class="page content-page" data-page="1" data-title="第 1 页">
+        <div class="page-image"><img src="images/01-fengmian.png" alt="月光下小刺猬圆圆抱红围巾"></div>
+        <div class="page-text">
+          <span class="page-num">第 1 页</span>
+          <p>小刺猬圆圆，抱着一团红红的围巾，住在大树洞里。今晚，月亮又圆又亮，他要出门找朋友啦。</p>
+          <audio preload="auto" src="audio/01.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 2 -->
+      <section class="page content-page" data-page="2" data-title="第 2 页">
+        <div class="page-image"><img src="images/02-shudongye.png" alt="树洞卧室里圆圆盖红围巾入梦"></div>
+        <div class="page-text">
+          <span class="page-num">第 2 页</span>
+          <p>圆圆把红围巾当被子，软软的，可暖和啦。"呼噜噜……"他做着甜甜的梦。</p>
+          <audio preload="auto" src="audio/02.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 3 -->
+      <section class="page content-page" data-page="3" data-title="第 3 页">
+        <div class="page-image"><img src="images/03-wuyamama.png" alt="乌鸦妈妈抱着小乌鸦站在枝头"></div>
+        <div class="page-text">
+          <span class="page-num">第 3 页</span>
+          <p>"呱呱……"乌鸦妈妈抱着小宝宝。圆圆醒了："哎呀，外面有谁在哭呀？"</p>
+          <audio preload="auto" src="audio/03.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 4 -->
+      <section class="page content-page" data-page="4" data-title="第 4 页">
+        <div class="page-image"><img src="images/04-paidui.png" alt="小动物们在森林里准备拥抱派对"></div>
+        <div class="page-text">
+          <span class="page-num">第 4 页</span>
+          <p>明天是森林大派对！小动物们忙忙碌碌，挂了灯笼，彩带飘飘的。</p>
+          <audio preload="auto" src="audio/04.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 5 -->
+      <section class="page content-page" data-page="5" data-title="第 5 页">
+        <div class="page-image"><img src="images/05-yuanguan.png" alt="圆圆躲在大树后面犹豫"></div>
+        <div class="page-text">
+          <span class="page-num">第 5 页</span>
+          <p>圆圆也想来玩，可是……他身上的刺，会不会扎到小伙伴呀？他躲在大树后面，不敢过去。</p>
+          <audio preload="auto" src="audio/05.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 6 -->
+      <section class="page content-page" data-page="6" data-title="第 6 页">
+        <div class="page-image"><img src="images/06-tiaozhuan.png" alt="小白兔把红围巾暖暖围在圆圆脖子上"></div>
+        <div class="page-text">
+          <span class="page-num">第 6 页</span>
+          <p>"当当当！"小兔子跑来，把红围巾暖暖地围在圆圆脖子上："你是我最好的朋友呀！"</p>
+          <audio preload="auto" src="audio/06.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 7 -->
+      <section class="page content-page" data-page="7" data-title="第 7 页">
+        <div class="page-image"><img src="images/07-quniyongbao.png" alt="小伙伴们把圆圆抱得紧紧的"></div>
+        <div class="page-text">
+          <span class="page-num">第 7 页</span>
+          <p>"我们也来啦！"小伙伴们扑过来，把圆圆抱得紧紧的，红围巾飞起来像一团小火焰。</p>
+          <audio preload="auto" src="audio/07.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 8 -->
+      <section class="page content-page" data-page="8" data-title="第 8 页">
+        <div class="page-image"><img src="images/08-heying.png" alt="全员合影比心"></div>
+        <div class="page-text">
+          <span class="page-num">第 8 页</span>
+          <p>"我们都是好朋友！"大家一起笑着、跳着、唱着。原来朋友抱一抱，刺也不怕扎人啦。</p>
+          <audio preload="auto" src="audio/08.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 9 -->
+      <section class="page content-page" data-page="9" data-title="第 9 页">
+        <div class="page-image"><img src="images/09-shouweye.png" alt="星夜萤火虫点点小伙伴道晚安"></div>
+        <div class="page-text">
+          <span class="page-num">第 9 页</span>
+          <p>月亮爬到树梢上，萤火虫一盏一盏亮起来。"明天见！""明天见！"大家挥挥手说晚安。</p>
+          <audio preload="auto" src="audio/09.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 10 -->
+      <section class="page content-page" data-page="10" data-title="第 10 页">
+        <div class="page-image"><img src="images/10-fengye.png" alt="圆圆抱着红围巾在树洞里睡着了"></div>
+        <div class="page-text">
+          <span class="page-num">第 10 页</span>
+          <p>圆圆抱着红围巾睡着了。梦里呀，他和小伙伴们抱在一起，又跳又笑呢。晚安，小圆圆。</p>
+          <audio preload="auto" src="audio/10.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- End page -->
+      <section class="page end-page" data-page="11" data-title="完">
+        <div class="end-content">
+          <h2>🦔 故事讲完啦 🦔</h2>
+          <p class="lesson">小刺猬的大拥抱</p>
+          <p class="lesson-text">我的刺不是坏东西，它们是保护自己的盔甲。而当我想要温暖的时候，我需要的不是丢掉盔甲，而是找到愿意温柔对待我的人。</p>
+          <button class="restart-btn" id="restartBtn">↺ 再读一遍</button>
+        </div>
+      </section>
+
+      <button class="autoplay-fab" id="autoFlipBtn" aria-label="自动朗读" title="自动朗读">▶</button>
+
+    </div>
+
+    <p class="hint-text">点击书页左/右半区翻页 · 或按 ← → 方向键</p>
+  </div>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const total = pages.length;
+    const restartBtn = document.getElementById('restartBtn');
+    const book = document.getElementById('book');
+    const autoFlipBtn = document.getElementById('autoFlipBtn');
+    const hintText = document.querySelector('.hint-text');
+
+    let current = 0;
+    let userInteracted = false;
+    let autoFlip = false;
+    let autoAudioPaused = false;  // only meaningful when autoFlip is true
+    let autoAdvanceTimer = null;
+    let trackedAudio = null;
+
+    const DEFAULT_HINT = '点击书页左/右半区翻页 · 或按 ← → 方向键';
+    const AUTOPLAY_HINT = '正在自动朗读';
+    const PAUSED_HINT = '朗读已暂停';
+    const FAB_PLAY = '▶';
+    const FAB_PAUSE = '⏸';
+    // Audio clips are short (~10-20s); 30s is a safe upper bound for the safety net
+    const AUDIO_TIMEOUT_MS = 30000;
+    const COVER_DELAY_MS = 1500;
+
+    function setStates() {
+      pages.forEach((p, i) => {
+        p.classList.remove('active', 'prev', 'next');
+        if (i === current) p.classList.add('active');
+        else if (i < current) p.classList.add('prev');
+        else p.classList.add('next');
+      });
+
+      // Pause all audios, then play the current page's audio (unless auto-flip is paused)
+      document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+      const curAudio = pages[current].querySelector('audio');
+      const autoPaused = autoFlip && autoAudioPaused;
+      if (curAudio && userInteracted && !autoPaused) {
+        curAudio.play().catch(() => { /* autoplay blocked, user can press play */ });
+      }
+
+      scheduleAutoAdvance();
+    }
+
+    function go(dir) {
+      const target = current + dir;
+      if (target < 0 || target >= total) return;
+      current = target;
+      setStates();
+    }
+
+    function jumpTo(idx) {
+      if (idx < 0 || idx >= total) return;
+      current = idx;
+      setStates();
+    }
+
+    // --- Auto-flip logic: advance to next page when current page's audio ends ---
+    function onAudioEnded() {
+      advanceOne();
+    }
+
+    function clearAutoAdvance() {
+      if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+      if (trackedAudio) {
+        trackedAudio.removeEventListener('ended', onAudioEnded);
+        trackedAudio = null;
+      }
+    }
+
+    function pauseCurrentAudio() {
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.pause();
+    }
+
+    function advanceOne() {
+      if (autoFlip && !autoAudioPaused && current < total - 1) {
+        current++;
+        setStates();
+      }
+    }
+
+    function scheduleAutoAdvance() {
+      clearAutoAdvance();
+      if (!autoFlip || autoAudioPaused || current >= total - 1) return;
+
+      const curAudio = pages[current].querySelector('audio');
+      if (curAudio) {
+        curAudio.addEventListener('ended', onAudioEnded);
+        trackedAudio = curAudio;
+        // Safety net in case `ended` never fires (autoplay blocked, network error, etc.)
+        autoAdvanceTimer = setTimeout(advanceOne, AUDIO_TIMEOUT_MS);
+      } else {
+        // Cover page has no audio — advance after a short delay
+        autoAdvanceTimer = setTimeout(advanceOne, COVER_DELAY_MS);
+      }
+    }
+
+    function updateAutoFlipButton() {
+      autoFlipBtn.classList.toggle('active', autoFlip && !autoAudioPaused);
+      autoFlipBtn.classList.toggle('paused', autoFlip && autoAudioPaused);
+      if (!autoFlip) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '自动朗读');
+        autoFlipBtn.setAttribute('title', '自动朗读');
+        hintText.textContent = DEFAULT_HINT;
+      } else if (autoAudioPaused) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '继续朗读');
+        autoFlipBtn.setAttribute('title', '继续朗读');
+        hintText.textContent = PAUSED_HINT;
+      } else {
+        autoFlipBtn.textContent = FAB_PAUSE;
+        autoFlipBtn.setAttribute('aria-label', '暂停朗读');
+        autoFlipBtn.setAttribute('title', '暂停朗读');
+        hintText.textContent = AUTOPLAY_HINT;
+      }
+    }
+
+    function setAutoFlip(on) {
+      autoFlip = on;
+      autoAudioPaused = false;
+      if (on) {
+        // userInteracted must be set before setStates() — setStates reads it to decide autoplay
+        userInteracted = true;
+        if (current >= total - 1) current = 0;  // restart from cover when toggling on from end page
+        setStates();
+      } else {
+        pauseCurrentAudio();
+        clearAutoAdvance();
+      }
+      updateAutoFlipButton();
+    }
+
+    function pauseAutoAudio() {
+      if (!autoFlip || autoAudioPaused) return;
+      autoAudioPaused = true;
+      pauseCurrentAudio();
+      clearAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    function resumeAutoAudio() {
+      if (!autoFlip || !autoAudioPaused) return;
+      autoAudioPaused = false;
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.play().catch(() => {});
+      scheduleAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    autoFlipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!autoFlip) setAutoFlip(true);
+      else if (autoAudioPaused) resumeAutoAudio();
+      else pauseAutoAudio();
+    });
+
+    // Click on book area: left half = prev, right half = next
+    book.addEventListener('click', (e) => {
+      if (e.target.closest('audio') || e.target.closest('button')) return;
+      userInteracted = true;
+      // Manual flip while paused → resume auto-flip on the new page
+      if (autoFlip && autoAudioPaused) {
+        autoAudioPaused = false;
+        updateAutoFlipButton();
+      }
+      const rect = book.getBoundingClientRect();
+      const isLeft = e.clientX - rect.left < rect.width / 2;
+      if (isLeft) {
+        if (current > 0) go(-1);
+      } else {
+        if (current < total - 1) go(1);
+      }
+    });
+
+    restartBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; jumpTo(0); });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); userInteracted = true; go(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); userInteracted = true; go(-1); }
+      else if (e.key === 'Home') { userInteracted = true; jumpTo(0); }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    book.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      userInteracted = true;
+    }, { passive: true });
+    book.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0) go(1);   // swipe left → next
+        else go(-1);          // swipe right → previous
+      }
+    }, { passive: true });
+
+    setStates();
+  </script>
+</body>
+</html>
