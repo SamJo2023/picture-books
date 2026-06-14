@@ -258,6 +258,23 @@ parts.append(f"""
   <footer>
     共 {total_voices} 个音色 · 已生成 {total_voices - total_missing} 段样音 · 缺 {total_missing} 段
   </footer>
+
+  <script>
+    // 同一时间只允许一段样音在播：新的开始播时，先停掉所有其他 audio
+    (function () {{
+      const audios = document.querySelectorAll('audio');
+      audios.forEach((a) => {{
+        a.addEventListener('play', () => {{
+          audios.forEach((other) => {{
+            if (other !== a && !other.paused) {{
+              other.pause();
+              other.currentTime = 0;
+            }}
+          }});
+        }});
+      }});
+    }})();
+  </script>
 </body>
 </html>
 """)

@@ -374,5 +374,22 @@
   <footer>
     共 54 个音色 · 已生成 54 段样音 · 缺 0 段
   </footer>
+
+  <script>
+    // 同一时间只允许一段样音在播：新的开始播时，先停掉所有其他 audio
+    (function () {
+      const audios = document.querySelectorAll('audio');
+      audios.forEach((a) => {
+        a.addEventListener('play', () => {
+          audios.forEach((other) => {
+            if (other !== a && !other.paused) {
+              other.pause();
+              other.currentTime = 0;
+            }
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
