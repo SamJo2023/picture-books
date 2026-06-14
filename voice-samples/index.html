@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mmx 中文语音试听 · 为女儿选一个温柔的童声</title>
+  <style>
+    :root {
+      --bg-1: #fff5e6;
+      --bg-2: #ffe8c2;
+      --accent: #e8954a;
+      --text: #4a2c1a;
+      --soft: #8a5a3a;
+      --card: #fffdf7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(ellipse at top, var(--bg-2) 0%, var(--bg-1) 60%, #f5d9a8 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+    header {
+      max-width: 1000px;
+      margin: 0 auto 30px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 18px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+    h1 { font-size: 38px; font-weight: 800; letter-spacing: 4px; margin-bottom: 10px; }
+    .subtitle { font-size: 15px; color: var(--soft); line-height: 1.7; max-width: 720px; margin: 0 auto; }
+    .quote {
+      margin: 18px auto 0;
+      max-width: 720px;
+      background: rgba(255,253,247,0.7);
+      border-left: 4px solid var(--accent);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--soft);
+      line-height: 1.7;
+    }
+    .quote b { color: var(--text); }
+    main { max-width: 1000px; margin: 30px auto 0; }
+    .category {
+      background: rgba(255,253,247,0.6);
+      border-radius: 18px;
+      padding: 20px 22px 24px;
+      margin-bottom: 24px;
+    }
+    .category h2 {
+      font-size: 18px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed rgba(232,149,74,0.3);
+    }
+    .category h2 .hint { font-size: 12px; color: var(--soft); font-weight: 400; margin-left: 8px; }
+    .voice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .voice {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 2px 8px rgba(74,44,26,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .voice .row { display: flex; justify-content: space-between; align-items: center; }
+    .voice .label { font-size: 15px; font-weight: 600; }
+    .voice .id {
+      font-size: 11px;
+      color: var(--soft);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      word-break: break-all;
+      text-align: right;
+      max-width: 50%;
+    }
+    .voice audio { width: 100%; height: 36px; }
+    .missing {
+      opacity: 0.45;
+      background: #faf3e3;
+    }
+    .missing audio { display: none; }
+    .missing .label::after {
+      content: " · 未生成";
+      font-size: 11px;
+      color: #c66;
+      font-weight: 400;
+    }
+    footer {
+      max-width: 1000px;
+      margin: 30px auto 0;
+      text-align: center;
+      color: var(--soft);
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    @media (max-width: 600px) {
+      h1 { font-size: 26px; letter-spacing: 2px; }
+      .category { padding: 16px; }
+      .voice-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">mmx 中文语音试听</span>
+    <h1>挑一个温柔的声音</h1>
+    <p class="subtitle">下方每张卡片是一段 10 秒左右的样音。挑出最适合给 3 岁小朋友讲睡前故事的那一款。</p>
+    <div class="quote">
+      所有样音朗读的是同一段：<b>从前，有一只小刺猬叫圆圆。有一天，他戴着红围巾，去森林里找朋友们玩。</b>
+    </div>
+  </header>
+  <section class="category">
+    <h2>基础女声 / 基础男声（4 + 4）<span class="hint">共 8 个</span></h2>
+    <div class="voice-grid">
+      <div class="voice">
+        <div class="row"><span class="label">少女</span><span class="id">female-shaonv</span></div>
+        <audio controls preload="none" src="female-shaonv.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">御姐</span><span class="id">female-yujie</span></div>
+        <audio controls preload="none" src="female-yujie.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">成熟</span><span class="id">female-chengshu</span></div>
+        <audio controls preload="none" src="female-chengshu.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">甜妹</span><span class="id">female-tianmei</span></div>
+        <audio controls preload="none" src="female-tianmei.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">青涩</span><span class="id">male-qn-qingse</span></div>
+        <audio controls preload="none" src="male-qn-qingse.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">精英</span><span class="id">male-qn-jingying</span></div>
+        <audio controls preload="none" src="male-qn-jingying.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">霸道</span><span class="id">male-qn-badao</span></div>
+        <audio controls preload="none" src="male-qn-badao.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">大学生</span><span class="id">male-qn-daxuesheng</span></div>
+        <audio controls preload="none" src="male-qn-daxuesheng.mp3"></audio>
+      </div>
+    </div>
+  </section>
+  <section class="category">
+    <h2>精品版（基础 + HD）<span class="hint">共 8 个</span></h2>
+    <div class="voice-grid">
+      <div class="voice">
+        <div class="row"><span class="label">少女·精品</span><span class="id">female-shaonv-jingpin</span></div>
+        <audio controls preload="none" src="female-shaonv-jingpin.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">御姐·精品</span><span class="id">female-yujie-jingpin</span></div>
+        <audio controls preload="none" src="female-yujie-jingpin.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">成熟·精品</span><span class="id">female-chengshu-jingpin</span></div>
+        <audio controls preload="none" src="female-chengshu-jingpin.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">甜妹·精品</span><span class="id">female-tianmei-jingpin</span></div>
+        <audio controls preload="none" src="female-tianmei-jingpin.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">青涩·精品</span><span class="id">male-qn-qingse-jingpin</span></div>
+        <audio controls preload="none" src="male-qn-qingse-jingpin.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">精英·精品</span><span class="id">male-qn-jingying-jingpin</span></div>
+        <audio controls preload="none" src="male-qn-jingying-jingpin.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">霸道·精品</span><span class="id">male-qn-badao-jingpin</span></div>
+        <audio controls preload="none" src="male-qn-badao-jingpin.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">大学生·精品</span><span class="id">male-qn-daxuesheng-jingpin</span></div>
+        <audio controls preload="none" src="male-qn-daxuesheng-jingpin.mp3"></audio>
+      </div>
+    </div>
+  </section>
+  <section class="category">
+    <h2>童声 / 角色（适合绘本）<span class="hint">共 14 个</span></h2>
+    <div class="voice-grid">
+      <div class="voice">
+        <div class="row"><span class="label">小男孩</span><span class="id">cute_boy</span></div>
+        <audio controls preload="none" src="cute_boy.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">机灵鬼</span><span class="id">clever_boy</span></div>
+        <audio controls preload="none" src="clever_boy.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">可爱女孩</span><span class="id">lovely_girl</span></div>
+        <audio controls preload="none" src="lovely_girl.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">卡通猪</span><span class="id">cartoon_pig</span></div>
+        <audio controls preload="none" src="cartoon_pig.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">甜心小玲</span><span class="id">tianxin_xiaoling</span></div>
+        <audio controls preload="none" src="tianxin_xiaoling.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">俏皮萌妹</span><span class="id">qiaopi_mengmei</span></div>
+        <audio controls preload="none" src="qiaopi_mengmei.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">嗲嗲学妹</span><span class="id">diadia_xuemei</span></div>
+        <audio controls preload="none" src="diadia_xuemei.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">淡雅学姐</span><span class="id">danya_xuejie</span></div>
+        <audio controls preload="none" src="danya_xuejie.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">妩媚御姐</span><span class="id">wumei_yujie</span></div>
+        <audio controls preload="none" src="wumei_yujie.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">傲娇弟弟</span><span class="id">bingjiao_didi</span></div>
+        <audio controls preload="none" src="bingjiao_didi.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">纯真学弟</span><span class="id">chunzhen_xuedi</span></div>
+        <audio controls preload="none" src="chunzhen_xuedi.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">俊朗男友</span><span class="id">junlang_nanyou</span></div>
+        <audio controls preload="none" src="junlang_nanyou.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">霸道少爷</span><span class="id">badao_shaoye</span></div>
+        <audio controls preload="none" src="badao_shaoye.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">冷淡兄长</span><span class="id">lengdan_xiongzhang</span></div>
+        <audio controls preload="none" src="lengdan_xiongzhang.mp3"></audio>
+      </div>
+    </div>
+  </section>
+  <section class="category">
+    <h2>Chinese (Mandarin) 系列 · 女士 / 女孩<span class="hint">共 12 个</span></h2>
+    <div class="voice-grid">
+      <div class="voice">
+        <div class="row"><span class="label">软糯女孩</span><span class="id">Chinese (Mandarin)_Soft_Girl</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Soft_Girl.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">甜美淑女</span><span class="id">Chinese (Mandarin)_Sweet_Lady</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Sweet_Lady.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">暖心姑娘</span><span class="id">Chinese (Mandarin)_Warm_Girl</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Warm_Girl.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">元气少女</span><span class="id">Chinese (Mandarin)_Cute_Spirit</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Cute_Spirit.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">知性姐姐</span><span class="id">Chinese (Mandarin)_Wise_Women</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Wise_Women.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">成熟女性</span><span class="id">Chinese (Mandarin)_Mature_Woman</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Mature_Woman.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">暖心闺蜜</span><span class="id">Chinese (Mandarin)_Warm_Bestie</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Warm_Bestie.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">知心阿姨</span><span class="id">Chinese (Mandarin)_Kind-hearted_Antie</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Kind-hearted_Antie.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">慈祥长辈</span><span class="id">Chinese (Mandarin)_Kind-hearted_Elder</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Kind-hearted_Elder.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">抒情女声</span><span class="id">Chinese (Mandarin)_Lyrical_Voice</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Lyrical_Voice.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">电台女主播</span><span class="id">Chinese (Mandarin)_Radio_Host</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Radio_Host.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">傲娇小姐</span><span class="id">Arrogant_Miss</span></div>
+        <audio controls preload="none" src="Arrogant_Miss.mp3"></audio>
+      </div>
+    </div>
+  </section>
+  <section class="category">
+    <h2>Chinese (Mandarin) 系列 · 男士 / 男孩<span class="hint">共 11 个</span></h2>
+    <div class="voice-grid">
+      <div class="voice">
+        <div class="row"><span class="label">温润少年</span><span class="id">Chinese (Mandarin)_Gentle_Youth</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Gentle_Youth.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">真诚青年</span><span class="id">Chinese (Mandarin)_Sincere_Adult</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Sincere_Adult.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">南方小哥</span><span class="id">Chinese (Mandarin)_Southern_Young_Man</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Southern_Young_Man.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">洒脱青年</span><span class="id">Chinese (Mandarin)_Unrestrained_Young_Man</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Unrestrained_Young_Man.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">绅士</span><span class="id">Chinese (Mandarin)_Gentleman</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Gentleman.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">稳重高管</span><span class="id">Chinese (Mandarin)_Reliable_Executive</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Reliable_Executive.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">新闻主播</span><span class="id">Chinese (Mandarin)_News_Anchor</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__News_Anchor.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">男播音员</span><span class="id">Chinese (Mandarin)_Male_Announcer</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Male_Announcer.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">幽默老爷爷</span><span class="id">Chinese (Mandarin)_Humorous_Elder</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Humorous_Elder.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">HK 空少</span><span class="id">Chinese (Mandarin)_HK_Flight_Attendant</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__HK_Flight_Attendant.mp3"></audio>
+      </div>
+      <div class="voice">
+        <div class="row"><span class="label">倔强朋友</span><span class="id">Chinese (Mandarin)_Stubborn_Friend</span></div>
+        <audio controls preload="none" src="Chinese__Mandarin__Stubborn_Friend.mp3"></audio>
+      </div>
+    </div>
+  </section>
+  <section class="category">
+    <h2>其他（特殊角色）<span class="hint">共 1 个</span></h2>
+    <div class="voice-grid">
+      <div class="voice">
+        <div class="row"><span class="label">机甲战士</span><span class="id">Robot_Armor</span></div>
+        <audio controls preload="none" src="Robot_Armor.mp3"></audio>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    共 54 个音色 · 已生成 54 段样音 · 缺 0 段
+  </footer>
+</body>
+</html>
