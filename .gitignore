@@ -13,6 +13,10 @@ Thumbs.db
 node_modules/
 *.log
 minimax-output/
+# 本地一次性脚本（git 探测、commit 包装等）
+check-git.js
+git-commit.js
+*.tmp.js
 
 # 内部参考文档（非绘本内容）
 minimax-CLI.md

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小狐狸的红围巾 · 3D 卡通儿童绘本</title>
+
+  <!-- 预加载所有音频，首翻页即播 -->
+  <link rel="preload" href="audio/01.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/02.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/03.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/04.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/05.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/06.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/07.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/08.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/09.mp3" as="audio" type="audio/mpeg">
+  <style>
+    :root {
+      --bg-1: #eef2fb;
+      --bg-2: #d8e2f3;
+      --accent: #d4351c;
+      --accent-soft: #f4a09a;
+      --text: #1e2940;
+      --soft: #4a5670;
+      --card: #fdfdff;
+      --frost: #b8c8e4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "STHeiti", "Source Han Sans CN", sans-serif;
+      background:
+        radial-gradient(ellipse at top, var(--bg-2) 0%, var(--bg-1) 60%, #c8d4ec 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 14px 16px 16px;
+      overflow-x: hidden;
+    }
+
+    /* 3D book stage */
+    .book-stage {
+      perspective: 2400px;
+      perspective-origin: 50% 30%;
+      width: 100%;
+      max-width: 880px;
+      position: relative;
+    }
+
+    .book {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: 75vh;
+      transform-style: preserve-3d;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow:
+        0 20px 50px rgba(30, 41, 64, 0.20),
+        0 6px 16px rgba(30, 41, 64, 0.10),
+        inset 0 0 0 1px rgba(184, 200, 228, 0.4);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transition: transform 0.85s cubic-bezier(0.45, 0.05, 0.2, 1),
+                  opacity 0.6s ease;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Page states */
+    .page.active {
+      opacity: 1;
+      transform: rotateY(0deg) translateZ(0);
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    .page.prev {
+      opacity: 0;
+      transform: rotateY(-180deg) translateZ(0);
+      z-index: 2;
+    }
+
+    .page.next {
+      opacity: 0;
+      transform: rotateY(0deg) translateZ(-50px);
+      z-index: 1;
+    }
+
+    /* Cover page */
+    .cover-page {
+      background:
+        radial-gradient(ellipse at top, #e8eef9 0%, #d4def0 70%, #b8c8e4 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .cover-content {
+      padding: 24px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cover-image {
+      width: 80%;
+      max-width: 520px;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 12px 30px rgba(30, 41, 64, 0.25),
+        0 4px 10px rgba(30, 41, 64, 0.12);
+      margin-bottom: 16px;
+    }
+
+    .cover-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cover-content .badge {
+      display: inline-block;
+      padding: 5px 16px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .cover-content h1 {
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: 8px;
+      color: var(--text);
+      margin-bottom: 8px;
+      text-shadow: 3px 3px 0 rgba(212, 53, 28, 0.18);
+    }
+
+    .cover-content .subtitle {
+      font-size: 16px;
+      color: var(--soft);
+      margin-bottom: 16px;
+    }
+
+    .start-hint {
+      margin-top: 4px;
+      font-size: 15px;
+      color: var(--accent);
+      font-weight: 600;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Content page layout */
+    .content-page {
+      padding: 20px;
+    }
+
+    .page-image {
+      flex: 1;
+      min-height: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #eef2fb, #d8e2f3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .page-text {
+      flex-shrink: 0;
+      padding: 18px 8px 4px;
+      text-align: center;
+    }
+
+    .page-num {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 3px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .page-text p {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 12px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .page-text audio {
+      width: 100%;
+      max-width: 480px;
+      height: 38px;
+    }
+
+    /* End page */
+    .end-page {
+      background:
+        radial-gradient(ellipse at top, #e8eef9 0%, #d4def0 70%, #b8c8e4 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .end-content { padding: 32px; }
+
+    .end-content h2 {
+      font-size: 32px;
+      color: var(--accent);
+      margin-bottom: 24px;
+      letter-spacing: 2px;
+    }
+
+    .end-content .lesson {
+      font-size: 20px;
+      color: var(--text);
+      margin: 8px 0 12px;
+    }
+
+    .end-content .lesson-text {
+      font-size: 16px;
+      color: var(--soft);
+      line-height: 1.9;
+      max-width: 560px;
+      margin: 0 auto 24px;
+    }
+
+    .end-content .signature {
+      font-size: 14px;
+      color: var(--soft);
+      margin-top: 18px;
+      font-style: italic;
+      opacity: 0.85;
+    }
+
+    .restart-btn {
+      padding: 12px 32px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(212, 53, 28, 0.4);
+    }
+
+    .hint-text {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--soft);
+      opacity: 0.7;
+    }
+
+    /* Auto-flip floating action button */
+    .autoplay-fab {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      z-index: 1000;
+      transform: translate3d(0, 0, 120px);
+      will-change: transform;
+      box-shadow: 0 3px 10px rgba(30, 41, 64, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .autoplay-fab:hover {
+      box-shadow: 0 4px 14px rgba(30, 41, 64, 0.35);
+    }
+
+    .autoplay-fab.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 5px 16px rgba(212, 53, 28, 0.5);
+      animation: autoPulse 1.6s ease-in-out infinite;
+    }
+
+    .autoplay-fab.paused {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 3px 10px rgba(212, 53, 28, 0.4);
+      animation: none;
+    }
+
+    @keyframes autoPulse {
+      0%, 100% { box-shadow: 0 6px 18px rgba(212, 53, 28, 0.5); }
+      50% { box-shadow: 0 8px 26px rgba(212, 53, 28, 0.75); }
+    }
+
+    /* Mobile */
+    @media (max-width: 720px) {
+      .cover-content h1 { font-size: 36px; letter-spacing: 5px; }
+      .end-content h2 { font-size: 24px; }
+      .page-text p { font-size: 15px; }
+      .autoplay-fab { width: 36px; height: 36px; font-size: 14px; bottom: 14px; right: 14px; }
+      .hint-text { font-size: 11px; }
+      .cover-image { width: 90%; }
+
+      /* 修复：手机端图片按原始 16:9 显示 */
+      .book {
+        aspect-ratio: auto;
+        max-height: none;
+      }
+      .page {
+        position: relative;
+        inset: auto;
+        transform: none !important;
+        opacity: 1 !important;
+        display: none;
+      }
+      .page.active {
+        display: flex;
+        animation: pageFadeIn 0.3s ease;
+      }
+      .page-image {
+        flex: none;
+        aspect-ratio: 16 / 9;
+        min-height: 0;
+      }
+
+      @keyframes pageFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="book-stage">
+    <div class="book" id="book">
+
+      <!-- Cover -->
+      <section class="page cover-page active" data-page="0" data-title="封面">
+        <div class="cover-content">
+          <div class="cover-image"><img src="images/00-cover.png" alt="小狐狸的红围巾封面"></div>
+          <span class="badge">冬日暖心童话</span>
+          <h1>小狐狸的红围巾</h1>
+          <p class="subtitle">3D 卡通绘本 · 童声朗读版 · 9 页</p>
+          <p class="start-hint">点击翻页 · 开始阅读</p>
+        </div>
+      </section>
+
+      <!-- Page 1 -->
+      <section class="page content-page" data-page="1" data-title="第 1 页">
+        <div class="page-image"><img src="images/01-dongzhuan.png" alt="小狐狸蹦蹦跳跳跑回家"></div>
+        <div class="page-text">
+          <span class="page-num">第 1 页</span>
+          <p>冬天来了，森林里下起了第一场雪。小狐狸蹦蹦跳跳地跑回家，抖了抖身上的雪花，对奶奶说："奶奶，奶奶，冬天到了！我想给您织一条围巾。"</p>
+          <audio preload="auto" src="audio/01.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 2 -->
+      <section class="page content-page" data-page="2" data-title="第 2 页">
+        <div class="page-image"><img src="images/02-sansezhong.png" alt="奶奶说要找三种颜色毛线"></div>
+        <div class="page-text">
+          <span class="page-num">第 2 页</span>
+          <p>奶奶笑眯眯地说："好呀，那你得去找三种颜色的毛线——白色像雪，黄色像蜂蜜，绿色像森林。"小狐狸点点头，围着奶奶转了三圈，就出发了。</p>
+          <audio preload="auto" src="audio/02.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 3 -->
+      <section class="page content-page" data-page="3" data-title="第 3 页">
+        <div class="page-image"><img src="images/03-xuebaimao.png" alt="山顶找小雪花借白色"></div>
+        <div class="page-text">
+          <span class="page-num">第 3 页</span>
+          <p>小狐狸爬到山顶，找到了一朵正在休息的小雪花。小雪花说："我把最白的一瓣送给你，但你得答应我，以后下雪的时候，要记得对我说'你好'。"小狐狸认真地答应了。</p>
+          <audio preload="auto" src="audio/03.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 4 -->
+      <section class="page content-page" data-page="4" data-title="第 4 页">
+        <div class="page-image"><img src="images/04-fengmimao.png" alt="老橡树找蜂王换黄色"></div>
+        <div class="page-text">
+          <span class="page-num">第 4 页</span>
+          <p>接着，小狐狸来到老橡树前，咚咚咚地敲了敲门。蜂王笑着说："可以呀，你帮我们采一点花蜜，我们就送你黄色毛线。"小狐狸采了一整天花蜜，脸染得像小花猫，蜂王很感动。</p>
+          <audio preload="auto" src="audio/04.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 5 -->
+      <section class="page content-page" data-page="5" data-title="第 5 页">
+        <div class="page-image"><img src="images/05-senlinlu.png" alt="用橡果和小松鼠换绿色"></div>
+        <div class="page-text">
+          <span class="page-num">第 5 页</span>
+          <p>最后，小狐狸找到了小松鼠。小松鼠有点舍不得绿色毛线。小狐狸从篮子里拿出几颗橡果："咱们换好不好？"小松鼠眼睛亮了："成交！"</p>
+          <audio preload="auto" src="audio/05.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 6 -->
+      <section class="page content-page" data-page="6" data-title="第 6 页">
+        <div class="page-image"><img src="images/06-zhiweijin.png" alt="灯下织围巾"></div>
+        <div class="page-text">
+          <span class="page-num">第 6 页</span>
+          <p>回到家，天已经黑了。小狐狸在灯下织呀织，织了整整三个晚上。手指被针扎了好几次，它都没哭，只是对着手指轻轻吹一吹气，又接着织。</p>
+          <audio preload="auto" src="audio/06.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 7 -->
+      <section class="page content-page" data-page="7" data-title="第 7 页">
+        <div class="page-image"><img src="images/07-weijinwancheng.png" alt="围巾织好了"></div>
+        <div class="page-text">
+          <span class="page-num">第 7 页</span>
+          <p>最后一天晚上，围巾终于织好了！白得像雪，黄得像蜜，绿得像森林，软得像云朵。</p>
+          <audio preload="auto" src="audio/07.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 8 -->
+      <section class="page content-page" data-page="8" data-title="第 8 页">
+        <div class="page-image"><img src="images/08-songweijin.png" alt="把围巾送给奶奶"></div>
+        <div class="page-text">
+          <span class="page-num">第 8 页</span>
+          <p>第二天早上，奶奶起床，发现小狐狸已经站在门口了。它脖子上系着那条围巾，脸蛋红红的，眼睛亮亮的。奶奶把围巾围上，眼眶一下子就红了："这是我收到过的，最美的礼物。"</p>
+          <audio preload="auto" src="audio/08.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 9 -->
+      <section class="page content-page" data-page="9" data-title="第 9 页">
+        <div class="page-image"><img src="images/09-xuedisanbu.png" alt="雪地散步"></div>
+        <div class="page-text">
+          <span class="page-num">第 9 页</span>
+          <p>窗外，雪还在下。小狐狸牵着奶奶的手，去森林里散步。它们的脚印一深一浅，留在雪地上，像两行小小的诗。</p>
+          <audio preload="auto" src="audio/09.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- End page -->
+      <section class="page end-page" data-page="10" data-title="完">
+        <div class="end-content">
+          <h2>🦊 故事讲完啦 🦊</h2>
+          <p class="lesson">爱在心里</p>
+          <p class="lesson-text">爱一个人，就是愿意为她走很远的路、问很多的人、付出自己的小宝贝。礼物不在贵重，在心里。亲爱的宝贝，你为家人做的每一件小事，爸爸妈妈都记得，也都珍惜得不得了。</p>
+          <button class="restart-btn" id="restartBtn">↺ 再读一遍</button>
+          <p class="signature">晚安，小朋友，做个甜甜的梦。</p>
+        </div>
+      </section>
+
+      <button class="autoplay-fab" id="autoFlipBtn" aria-label="自动朗读" title="自动朗读">▶</button>
+
+    </div>
+
+    <p class="hint-text">点击书页左/右半区翻页 · 或按 ← → 方向键</p>
+  </div>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const total = pages.length;
+    const restartBtn = document.getElementById('restartBtn');
+    const book = document.getElementById('book');
+    const autoFlipBtn = document.getElementById('autoFlipBtn');
+    const hintText = document.querySelector('.hint-text');
+
+    let current = 0;
+    let userInteracted = false;
+    let autoFlip = false;
+    let autoAudioPaused = false;
+    let autoAdvanceTimer = null;
+    let trackedAudio = null;
+
+    const DEFAULT_HINT = '点击书页左/右半区翻页 · 或按 ← → 方向键';
+    const AUTOPLAY_HINT = '正在自动朗读';
+    const PAUSED_HINT = '朗读已暂停';
+    const FAB_PLAY = '▶';
+    const FAB_PAUSE = '⏸';
+    const AUDIO_TIMEOUT_MS = 30000;
+    const COVER_DELAY_MS = 1500;
+
+    function tryPlay(audio) {
+      if (!audio) return;
+      const p = audio.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch((err) => {
+          console.warn('[audio] play() rejected, waiting for user gesture:', err && err.name);
+          const retry = () => {
+            const cur = pages[current] && pages[current].querySelector('audio');
+            if (cur) cur.play().catch(() => {});
+          };
+          document.addEventListener('click', retry, { once: true });
+          document.addEventListener('keydown', retry, { once: true });
+          document.addEventListener('touchstart', retry, { once: true });
+        });
+      }
+    }
+
+    function setStates() {
+      pages.forEach((p, i) => {
+        p.classList.remove('active', 'prev', 'next');
+        if (i === current) p.classList.add('active');
+        else if (i < current) p.classList.add('prev');
+        else p.classList.add('next');
+      });
+
+      document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+      const curAudio = pages[current].querySelector('audio');
+      const autoPaused = autoFlip && autoAudioPaused;
+      if (curAudio && userInteracted && !autoPaused) {
+        tryPlay(curAudio);
+      }
+
+      scheduleAutoAdvance();
+    }
+
+    function go(dir) {
+      const target = current + dir;
+      if (target < 0 || target >= total) return;
+      current = target;
+      setStates();
+    }
+
+    function jumpTo(idx) {
+      if (idx < 0 || idx >= total) return;
+      current = idx;
+      setStates();
+    }
+
+    function onAudioEnded() {
+      advanceOne();
+    }
+
+    function clearAutoAdvance() {
+      if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+      if (trackedAudio) {
+        trackedAudio.removeEventListener('ended', onAudioEnded);
+        trackedAudio = null;
+      }
+    }
+
+    function pauseCurrentAudio() {
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.pause();
+    }
+
+    function advanceOne() {
+      if (autoFlip && !autoAudioPaused && current < total - 1) {
+        current++;
+        setStates();
+      }
+    }
+
+    function scheduleAutoAdvance() {
+      clearAutoAdvance();
+      if (!autoFlip || autoAudioPaused || current >= total - 1) return;
+
+      const curAudio = pages[current].querySelector('audio');
+      if (curAudio) {
+        curAudio.addEventListener('ended', onAudioEnded);
+        trackedAudio = curAudio;
+        autoAdvanceTimer = setTimeout(advanceOne, AUDIO_TIMEOUT_MS);
+      } else {
+        autoAdvanceTimer = setTimeout(advanceOne, COVER_DELAY_MS);
+      }
+    }
+
+    function updateAutoFlipButton() {
+      autoFlipBtn.classList.toggle('active', autoFlip && !autoAudioPaused);
+      autoFlipBtn.classList.toggle('paused', autoFlip && autoAudioPaused);
+      if (!autoFlip) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '自动朗读');
+        autoFlipBtn.setAttribute('title', '自动朗读');
+        hintText.textContent = DEFAULT_HINT;
+      } else if (autoAudioPaused) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '继续朗读');
+        autoFlipBtn.setAttribute('title', '继续朗读');
+        hintText.textContent = PAUSED_HINT;
+      } else {
+        autoFlipBtn.textContent = FAB_PAUSE;
+        autoFlipBtn.setAttribute('aria-label', '暂停朗读');
+        autoFlipBtn.setAttribute('title', '暂停朗读');
+        hintText.textContent = AUTOPLAY_HINT;
+      }
+    }
+
+    function setAutoFlip(on) {
+      autoFlip = on;
+      autoAudioPaused = false;
+      if (on) {
+        userInteracted = true;
+        if (current >= total - 1) current = 0;
+        setStates();
+      } else {
+        pauseCurrentAudio();
+        clearAutoAdvance();
+      }
+      updateAutoFlipButton();
+    }
+
+    function pauseAutoAudio() {
+      if (!autoFlip || autoAudioPaused) return;
+      autoAudioPaused = true;
+      pauseCurrentAudio();
+      clearAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    function resumeAutoAudio() {
+      if (!autoFlip || !autoAudioPaused) return;
+      autoAudioPaused = false;
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.play().catch(() => {});
+      scheduleAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    autoFlipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!autoFlip) setAutoFlip(true);
+      else if (autoAudioPaused) resumeAutoAudio();
+      else pauseAutoAudio();
+    });
+
+    book.addEventListener('click', (e) => {
+      if (e.target.closest('audio') || e.target.closest('button')) return;
+      userInteracted = true;
+      if (autoFlip && autoAudioPaused) {
+        autoAudioPaused = false;
+        updateAutoFlipButton();
+      }
+      const rect = book.getBoundingClientRect();
+      const isLeft = e.clientX - rect.left < rect.width / 2;
+      if (isLeft) {
+        if (current > 0) go(-1);
+      } else {
+        if (current < total - 1) go(1);
+      }
+    });
+
+    restartBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; jumpTo(0); });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); userInteracted = true; go(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); userInteracted = true; go(-1); }
+      else if (e.key === 'Home') { userInteracted = true; jumpTo(0); }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    book.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      userInteracted = true;
+    }, { passive: true });
+    book.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0) go(1);
+        else go(-1);
+      }
+    }, { passive: true });
+
+    setStates();
+  </script>
+</body>
+</html>
