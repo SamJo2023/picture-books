@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小马紫罗兰的勇气水晶 · 3D 卡通儿童绘本</title>
+
+  <!-- 预加载所有音频，首翻页即播 -->
+  <link rel="preload" href="audio/01.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/02.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/03.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/04.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/05.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/06.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/07.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/08.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/09.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/10.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/11.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/12.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="audio/13.mp3" as="audio" type="audio/mpeg">
+  <style>
+    :root {
+      --bg-1: #f3edfa;
+      --bg-2: #e4d4f5;
+      --bg-3: #c8a8e8;
+      --accent: #7e57c2;
+      --accent-deep: #5e35a8;
+      --accent-soft: #b89ce0;
+      --text: #2d1b4e;
+      --soft: #6a4c93;
+      --card: #fdfaff;
+      --crystal: #6fb8e8;
+      --firefly: #ffd97a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "STHeiti", "Source Han Sans CN", sans-serif;
+      background:
+        radial-gradient(ellipse at top, var(--bg-2) 0%, var(--bg-1) 60%, #d4bdee 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 14px 16px 16px;
+      overflow-x: hidden;
+    }
+
+    /* 3D book stage */
+    .book-stage {
+      perspective: 2400px;
+      perspective-origin: 50% 30%;
+      width: 100%;
+      max-width: 880px;
+      position: relative;
+    }
+
+    .book {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: 75vh;
+      transform-style: preserve-3d;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow:
+        0 20px 50px rgba(94, 53, 168, 0.20),
+        0 6px 16px rgba(94, 53, 168, 0.10),
+        inset 0 0 0 1px rgba(184, 156, 224, 0.4);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transition: transform 0.85s cubic-bezier(0.45, 0.05, 0.2, 1),
+                  opacity 0.6s ease;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Page states */
+    .page.active {
+      opacity: 1;
+      transform: rotateY(0deg) translateZ(0);
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    .page.prev {
+      opacity: 0;
+      transform: rotateY(-180deg) translateZ(0);
+      z-index: 2;
+    }
+
+    .page.next {
+      opacity: 0;
+      transform: rotateY(0deg) translateZ(-50px);
+      z-index: 1;
+    }
+
+    /* Cover page */
+    .cover-page {
+      background:
+        radial-gradient(ellipse at top, #f3edfa 0%, #d8c4f0 70%, #b89ce0 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .cover-content {
+      padding: 24px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cover-image {
+      width: 80%;
+      max-width: 520px;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 12px 30px rgba(94, 53, 168, 0.25),
+        0 4px 10px rgba(94, 53, 168, 0.12);
+      margin-bottom: 16px;
+    }
+
+    .cover-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cover-content .badge {
+      display: inline-block;
+      padding: 5px 16px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .cover-content h1 {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      color: var(--text);
+      margin-bottom: 8px;
+      text-shadow: 3px 3px 0 rgba(126, 87, 194, 0.18);
+    }
+
+    .cover-content .subtitle {
+      font-size: 16px;
+      color: var(--soft);
+      margin-bottom: 16px;
+    }
+
+    .start-hint {
+      margin-top: 4px;
+      font-size: 15px;
+      color: var(--accent);
+      font-weight: 600;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Content page layout */
+    .content-page {
+      padding: 20px;
+    }
+
+    .page-image {
+      flex: 1;
+      min-height: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f3edfa, #e4d4f5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .page-text {
+      flex-shrink: 0;
+      padding: 18px 8px 4px;
+      text-align: center;
+    }
+
+    .page-num {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 3px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .page-text p {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 12px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .page-text audio {
+      width: 100%;
+      max-width: 480px;
+      height: 38px;
+    }
+
+    /* End page */
+    .end-page {
+      background:
+        radial-gradient(ellipse at top, #f3edfa 0%, #d8c4f0 70%, #b89ce0 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .end-content { padding: 32px; }
+
+    .end-content h2 {
+      font-size: 32px;
+      color: var(--accent-deep);
+      margin-bottom: 24px;
+      letter-spacing: 2px;
+    }
+
+    .end-content .lesson {
+      font-size: 20px;
+      color: var(--text);
+      margin: 8px 0 12px;
+      font-weight: 600;
+    }
+
+    .end-content .lesson-text {
+      font-size: 16px;
+      color: var(--soft);
+      line-height: 1.9;
+      max-width: 560px;
+      margin: 0 auto 24px;
+    }
+
+    .end-content .signature {
+      font-size: 14px;
+      color: var(--soft);
+      margin-top: 18px;
+      font-style: italic;
+      opacity: 0.85;
+    }
+
+    .restart-btn {
+      padding: 12px 32px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(126, 87, 194, 0.4);
+    }
+
+    .hint-text {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--soft);
+      opacity: 0.7;
+    }
+
+    /* Auto-flip floating action button */
+    .autoplay-fab {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      z-index: 1000;
+      transform: translate3d(0, 0, 120px);
+      will-change: transform;
+      box-shadow: 0 3px 10px rgba(94, 53, 168, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .autoplay-fab:hover {
+      box-shadow: 0 4px 14px rgba(94, 53, 168, 0.35);
+    }
+
+    .autoplay-fab.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 5px 16px rgba(126, 87, 194, 0.5);
+      animation: autoPulse 1.6s ease-in-out infinite;
+    }
+
+    .autoplay-fab.paused {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 3px 10px rgba(126, 87, 194, 0.4);
+      animation: none;
+    }
+
+    @keyframes autoPulse {
+      0%, 100% { box-shadow: 0 6px 18px rgba(126, 87, 194, 0.5); }
+      50% { box-shadow: 0 8px 26px rgba(126, 87, 194, 0.75); }
+    }
+
+    /* Mobile */
+    @media (max-width: 720px) {
+      .cover-content h1 { font-size: 32px; letter-spacing: 3px; }
+      .end-content h2 { font-size: 24px; }
+      .page-text p { font-size: 15px; }
+      .autoplay-fab { width: 36px; height: 36px; font-size: 14px; bottom: 14px; right: 14px; }
+      .hint-text { font-size: 11px; }
+      .cover-image { width: 90%; }
+
+      /* 修复：手机端图片按原始 16:9 显示 */
+      .book {
+        aspect-ratio: auto;
+        max-height: none;
+      }
+      .page {
+        position: relative;
+        inset: auto;
+        transform: none !important;
+        opacity: 1 !important;
+        display: none;
+      }
+      .page.active {
+        display: flex;
+        animation: pageFadeIn 0.3s ease;
+      }
+      .page-image {
+        flex: none;
+        aspect-ratio: 16 / 9;
+        min-height: 0;
+      }
+
+      @keyframes pageFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="book-stage">
+    <div class="book" id="book">
+
+      <!-- Cover -->
+      <section class="page cover-page active" data-page="0" data-title="封面">
+        <div class="cover-content">
+          <div class="cover-image"><img src="images/00-fengmian.png" alt="小马紫罗兰的勇气水晶封面"></div>
+          <span class="badge">勇气童话 · 为女儿收藏</span>
+          <h1>小马紫罗兰的勇气水晶</h1>
+          <p class="subtitle">3D 卡通绘本 · 童声朗读版 · 13 页</p>
+          <p class="start-hint">点击翻页 · 开始阅读</p>
+        </div>
+      </section>
+
+      <!-- Page 1 -->
+      <section class="page content-page" data-page="1" data-title="第 1 页">
+        <div class="page-image"><img src="images/01-caixiaogu.png" alt="彩霞谷的紫罗兰"></div>
+        <div class="page-text">
+          <span class="page-num">第 1 页</span>
+          <p>在小马国最南边，有一片叫做"彩霞谷"的地方。这里住着一匹浅紫色的小马，名叫紫罗兰。她既不会飞，也不会什么厉害的魔法——她唯一擅长的，就是画画。</p>
+          <audio preload="auto" src="audio/01.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 2 -->
+      <section class="page content-page" data-page="2" data-title="第 2 页">
+        <div class="page-image"><img src="images/02-caihongquan.png" alt="彩虹泉不喷水了"></div>
+        <div class="page-text">
+          <span class="page-num">第 2 页</span>
+          <p>这天早晨，彩虹泉突然不喷水了！泉水是整个山谷的心脏，如果泉水停了，山谷里的花就会慢慢枯萎。飞马蓝天绕着泉水转了三圈，急得直跺脚；独角兽星光试着用魔法推水，可泉水就像睡着了一样，一动不动。</p>
+          <audio preload="auto" src="audio/02.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 3 -->
+      <section class="page content-page" data-page="3" data-title="第 3 页">
+        <div class="page-image"><img src="images/03-laomama.png" alt="老马奶奶讲传说"></div>
+        <div class="page-text">
+          <span class="page-num">第 3 页</span>
+          <p>老马奶奶慢慢走过来："彩虹泉需要一颗'勇气水晶'放在泉底，水才会重新流起来。那颗水晶，很久以前掉进了北边的迷雾森林。"蓝天和星光听了都低下了头。</p>
+          <audio preload="auto" src="audio/03.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 4 -->
+      <section class="page content-page" data-page="4" data-title="第 4 页">
+        <div class="page-image"><img src="images/04-zilansong.png" alt="紫罗兰主动站出来"></div>
+        <div class="page-text">
+          <span class="page-num">第 4 页</span>
+          <p>"我……我去吧。"所有小马都转过头来。"你？"蓝天瞪大了眼睛，"你连飞都不会！"紫罗兰有点不好意思，但她还是站直了身子："我可以带上我的画本和颜料。路上要是不认识路，我就把走过的地方画下来，就不会迷路了。"</p>
+          <audio preload="auto" src="audio/04.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 5 -->
+      <section class="page content-page" data-page="5" data-title="第 5 页">
+        <div class="page-image"><img src="images/05-chufa.png" alt="紫罗兰出发"></div>
+        <div class="page-text">
+          <span class="page-num">第 5 页</span>
+          <p>老马奶奶点了点头："去吧，孩子。记住，勇气不是不害怕，是害怕了还愿意往前走。"紫罗兰深吸一口气，背上小包，朝着迷雾森林出发了。</p>
+          <audio preload="auto" src="audio/05.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 6 -->
+      <section class="page content-page" data-page="6" data-title="第 6 页">
+        <div class="page-image"><img src="images/06-miwuxiangji.png" alt="紫罗兰在画本上画记号"></div>
+        <div class="page-text">
+          <span class="page-num">第 6 页</span>
+          <p>森林里雾气像牛奶一样浓，紫罗兰只能看到脚下一步远。她的心跳得很快，每走一段，她就蹲下来，在画本上画一个小记号——一棵歪脖子树，一块长着蘑菇的石头，一朵紫色的野花。</p>
+          <audio preload="auto" src="audio/06.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 7 -->
+      <section class="page content-page" data-page="7" data-title="第 7 页">
+        <div class="page-image"><img src="images/07-jiuming.png" alt="紫罗兰救萤火虫"></div>
+        <div class="page-text">
+          <span class="page-num">第 7 页</span>
+          <p>"呜呜呜……"一个细细的哭声传来。紫罗兰竖起耳朵，循着声音走过去。在一棵大树的根下面，一只小小的萤火虫被蛛网缠住了翅膀。"你别怕。"紫罗兰轻轻蹲下来，用蹄子一点一点拨开蛛网。萤火虫飞了起来，围着她转了一圈："谢谢你！"</p>
+          <audio preload="auto" src="audio/07.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 8 -->
+      <section class="page content-page" data-page="8" data-title="第 8 页">
+        <div class="page-image"><img src="images/08-yinghuichongdailu.png" alt="萤火虫带路"></div>
+        <div class="page-text">
+          <span class="page-num">第 8 页</span>
+          <p>萤火虫闪了闪："迷雾森林里的事，我都知道。我带你去找吧！"有了萤火虫带路，紫罗兰走得快多了。萤火虫的光虽然很小，但在浓雾里就像一盏小灯笼，把前面一小片路照得暖黄暖黄的。她们走过小溪，绕过青苔山坡，来到了森林的最深处。</p>
+          <audio preload="auto" src="audio/08.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 9 -->
+      <section class="page content-page" data-page="9" data-title="第 9 页">
+        <div class="page-image"><img src="images/09-dashitou.png" alt="大石头压着水晶"></div>
+        <div class="page-text">
+          <span class="page-num">第 9 页</span>
+          <p>那里有一块大石头，石头下面压着一个闪着淡蓝色光的东西。"就是它！勇气水晶！"可是石头太重了，紫罗兰推不动。她推了左边，石头不动；推了右边，还是不动。紫罗兰坐在地上，有点想哭。</p>
+          <audio preload="auto" src="audio/09.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 10 -->
+      <section class="page content-page" data-page="10" data-title="第 10 页">
+        <div class="page-image"><img src="images/10-tachushuiing.png" alt="从缝隙里拉出水晶"></div>
+        <div class="page-text">
+          <span class="page-num">第 10 页</span>
+          <p>但她想起了奶奶的话——"勇气不是不害怕，是害怕了还愿意往前走。"她擦了擦眼角，站起来，重新看了看那块大石头。石头底部有一条细细的缝，刚好能伸进去一只蹄子。紫罗兰趴下来，把蹄子伸进缝里，慢慢地、一点一点地把水晶往外拉——"啵！"水晶出来了！</p>
+          <audio preload="auto" src="audio/10.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 11 -->
+      <section class="page content-page" data-page="11" data-title="第 11 页">
+        <div class="page-image"><img src="images/11-huiquan.png" alt="彩虹泉恢复"></div>
+        <div class="page-text">
+          <span class="page-num">第 11 页</span>
+          <p>它小小的，只有一颗苹果那么大，但在紫罗兰的蹄心里，发出了一团温柔的蓝光，把整片迷雾都照亮了。紫罗兰抱着水晶跑回彩霞谷，把水晶轻轻放进彩虹泉的泉底。过了一会儿，泉水"咕嘟咕嘟"冒出了泡泡，接着，一道彩虹从泉底冲上了天！鲜花重新开了，草地重新绿了。</p>
+          <audio preload="auto" src="audio/11.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 12 -->
+      <section class="page content-page" data-page="12" data-title="第 12 页">
+        <div class="page-image"><img src="images/12-daoyu.png" alt="蓝天和星光道歉"></div>
+        <div class="page-text">
+          <span class="page-num">第 12 页</span>
+          <p>蓝天飞到紫罗兰面前，红着脸说："对不起，紫罗兰。我之前觉得画画没用，但你用画本记住了路，还带回了水晶——你比我勇敢多了。"星光也走过来："你虽然没有魔法，但你的心就是最厉害的魔法。"紫罗兰笑了。她忽然明白，画画让她学会了观察，学会了记住每一个细节，也学会了在害怕的时候，还能找到一条回家的路。</p>
+          <audio preload="auto" src="audio/12.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- Page 13 -->
+      <section class="page content-page" data-page="13" data-title="第 13 页">
+        <div class="page-image"><img src="images/13-zuihouhua.png" alt="紫罗兰的最后一幅画"></div>
+        <div class="page-text">
+          <span class="page-num">第 13 页</span>
+          <p>那天晚上，紫罗兰坐在彩虹泉边，画了一幅画。画里有浓雾、有大石头、有一条弯弯曲曲的小路，还有一个浅紫色的小身影，正低着头，一步一步往前走。旁边有一只小萤火虫，闪着微弱却温暖的光。她在画的下面写了一行字：<br><strong>"再小的光，也能照亮前方的路。"</strong></p>
+          <audio preload="auto" src="audio/13.mp3"></audio>
+        </div>
+      </section>
+
+      <!-- End page -->
+      <section class="page end-page" data-page="14" data-title="完">
+        <div class="end-content">
+          <h2>🦄 故事讲完啦 🦄</h2>
+          <p class="lesson">勇气在心里</p>
+          <p class="lesson-text">亲爱的宝贝，每个人都有自己擅长的事情。也许你会觉得自己的本领不够厉害，但当你用真心去做一件事，再小的才能也能创造大大的奇迹。记住——勇气不是不害怕，而是害怕了，还愿意往前走一步。你每走一步，都在变勇敢一点点。</p>
+          <button class="restart-btn" id="restartBtn">↺ 再读一遍</button>
+          <p class="signature">晚安，小朋友，愿你今晚的梦里，也有一颗亮亮的小水晶陪你。💜</p>
+        </div>
+      </section>
+
+      <button class="autoplay-fab" id="autoFlipBtn" aria-label="自动朗读" title="自动朗读">▶</button>
+
+    </div>
+
+    <p class="hint-text">点击书页左/右半区翻页 · 或按 ← → 方向键</p>
+  </div>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const total = pages.length;
+    const restartBtn = document.getElementById('restartBtn');
+    const book = document.getElementById('book');
+    const autoFlipBtn = document.getElementById('autoFlipBtn');
+    const hintText = document.querySelector('.hint-text');
+
+    let current = 0;
+    let userInteracted = false;
+    let autoFlip = false;
+    let autoAudioPaused = false;
+    let autoAdvanceTimer = null;
+    let trackedAudio = null;
+
+    const DEFAULT_HINT = '点击书页左/右半区翻页 · 或按 ← → 方向键';
+    const AUTOPLAY_HINT = '正在自动朗读';
+    const PAUSED_HINT = '朗读已暂停';
+    const FAB_PLAY = '▶';
+    const FAB_PAUSE = '⏸';
+    const AUDIO_TIMEOUT_MS = 30000;
+    const COVER_DELAY_MS = 1500;
+
+    function tryPlay(audio) {
+      if (!audio) return;
+      const p = audio.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch((err) => {
+          console.warn('[audio] play() rejected, waiting for user gesture:', err && err.name);
+          const retry = () => {
+            const cur = pages[current] && pages[current].querySelector('audio');
+            if (cur) cur.play().catch(() => {});
+          };
+          document.addEventListener('click', retry, { once: true });
+          document.addEventListener('keydown', retry, { once: true });
+          document.addEventListener('touchstart', retry, { once: true });
+        });
+      }
+    }
+
+    function setStates() {
+      pages.forEach((p, i) => {
+        p.classList.remove('active', 'prev', 'next');
+        if (i === current) p.classList.add('active');
+        else if (i < current) p.classList.add('prev');
+        else p.classList.add('next');
+      });
+
+      document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+      const curAudio = pages[current].querySelector('audio');
+      const autoPaused = autoFlip && autoAudioPaused;
+      if (curAudio && userInteracted && !autoPaused) {
+        tryPlay(curAudio);
+      }
+
+      scheduleAutoAdvance();
+    }
+
+    function go(dir) {
+      const target = current + dir;
+      if (target < 0 || target >= total) return;
+      current = target;
+      setStates();
+    }
+
+    function jumpTo(idx) {
+      if (idx < 0 || idx >= total) return;
+      current = idx;
+      setStates();
+    }
+
+    function onAudioEnded() {
+      advanceOne();
+    }
+
+    function clearAutoAdvance() {
+      if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+      if (trackedAudio) {
+        trackedAudio.removeEventListener('ended', onAudioEnded);
+        trackedAudio = null;
+      }
+    }
+
+    function pauseCurrentAudio() {
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.pause();
+    }
+
+    function advanceOne() {
+      if (autoFlip && !autoAudioPaused && current < total - 1) {
+        current++;
+        setStates();
+      }
+    }
+
+    function scheduleAutoAdvance() {
+      clearAutoAdvance();
+      if (!autoFlip || autoAudioPaused || current >= total - 1) return;
+
+      const curAudio = pages[current].querySelector('audio');
+      if (curAudio) {
+        curAudio.addEventListener('ended', onAudioEnded);
+        trackedAudio = curAudio;
+        autoAdvanceTimer = setTimeout(advanceOne, AUDIO_TIMEOUT_MS);
+      } else {
+        autoAdvanceTimer = setTimeout(advanceOne, COVER_DELAY_MS);
+      }
+    }
+
+    function updateAutoFlipButton() {
+      autoFlipBtn.classList.toggle('active', autoFlip && !autoAudioPaused);
+      autoFlipBtn.classList.toggle('paused', autoFlip && autoAudioPaused);
+      if (!autoFlip) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '自动朗读');
+        autoFlipBtn.setAttribute('title', '自动朗读');
+        hintText.textContent = DEFAULT_HINT;
+      } else if (autoAudioPaused) {
+        autoFlipBtn.textContent = FAB_PLAY;
+        autoFlipBtn.setAttribute('aria-label', '继续朗读');
+        autoFlipBtn.setAttribute('title', '继续朗读');
+        hintText.textContent = PAUSED_HINT;
+      } else {
+        autoFlipBtn.textContent = FAB_PAUSE;
+        autoFlipBtn.setAttribute('aria-label', '暂停朗读');
+        autoFlipBtn.setAttribute('title', '暂停朗读');
+        hintText.textContent = AUTOPLAY_HINT;
+      }
+    }
+
+    function setAutoFlip(on) {
+      autoFlip = on;
+      autoAudioPaused = false;
+      if (on) {
+        userInteracted = true;
+        if (current >= total - 1) current = 0;
+        setStates();
+      } else {
+        pauseCurrentAudio();
+        clearAutoAdvance();
+      }
+      updateAutoFlipButton();
+    }
+
+    function pauseAutoAudio() {
+      if (!autoFlip || autoAudioPaused) return;
+      autoAudioPaused = true;
+      pauseCurrentAudio();
+      clearAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    function resumeAutoAudio() {
+      if (!autoFlip || !autoAudioPaused) return;
+      autoAudioPaused = false;
+      const curAudio = pages[current] && pages[current].querySelector('audio');
+      if (curAudio) curAudio.play().catch(() => {});
+      scheduleAutoAdvance();
+      updateAutoFlipButton();
+    }
+
+    autoFlipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!autoFlip) setAutoFlip(true);
+      else if (autoAudioPaused) resumeAutoAudio();
+      else pauseAutoAudio();
+    });
+
+    book.addEventListener('click', (e) => {
+      if (e.target.closest('audio') || e.target.closest('button')) return;
+      userInteracted = true;
+      if (autoFlip && autoAudioPaused) {
+        autoAudioPaused = false;
+        updateAutoFlipButton();
+      }
+      const rect = book.getBoundingClientRect();
+      const isLeft = e.clientX - rect.left < rect.width / 2;
+      if (isLeft) {
+        if (current > 0) go(-1);
+      } else {
+        if (current < total - 1) go(1);
+      }
+    });
+
+    restartBtn.addEventListener('click', (e) => { e.stopPropagation(); userInteracted = true; jumpTo(0); });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); userInteracted = true; go(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); userInteracted = true; go(-1); }
+      else if (e.key === 'Home') { userInteracted = true; jumpTo(0); }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    book.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      userInteracted = true;
+    }, { passive: true });
+    book.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0) go(1);
+        else go(-1);
+      }
+    }, { passive: true });
+
+    setStates();
+  </script>
+</body>
+</html>

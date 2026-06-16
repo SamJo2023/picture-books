@@ -22,3 +22,6 @@ git-commit.js
 minimax-CLI.md
 
 .vercel
+
+# Windows 本地预览用（Vercel 部署不需要）
+serve.py
